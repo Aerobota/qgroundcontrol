@@ -180,6 +180,7 @@ void SimpleMissionItem::_connectSignals(void)
     connect(&_missionItem._commandFact, &Fact::valueChanged, this, &SimpleMissionItem::setDefaultsForCommand);
     connect(&_missionItem._commandFact, &Fact::valueChanged, this, &SimpleMissionItem::commandNameChanged);
     connect(&_missionItem._commandFact, &Fact::valueChanged, this, &SimpleMissionItem::commandDescriptionChanged);
+    connect(&_missionItem._commandFact, &Fact::valueChanged, this, &SimpleMissionItem::abbreviationChanged);
     connect(&_missionItem._commandFact, &Fact::valueChanged, this, &SimpleMissionItem::specifiesCoordinateChanged);
     connect(&_missionItem._commandFact, &Fact::valueChanged, this, &SimpleMissionItem::isStandaloneCoordinateChanged);
 
@@ -204,6 +205,7 @@ void SimpleMissionItem::_setupMetaData(void)
         _altitudeMetaData = new FactMetaData(FactMetaData::valueTypeDouble);
         _altitudeMetaData->setRawUnits("meters");
         _altitudeMetaData->setDecimalPlaces(2);
+        _altitudeMetaData->setAppSettingsTranslators();
 
         enumStrings.clear();
         enumValues.clear();
@@ -302,16 +304,35 @@ QString SimpleMissionItem::commandName(void) const
     }
 }
 
+QString SimpleMissionItem::abbreviation() const
+{
+    if (homePosition())
+        return QStringLiteral("H");
+
+    switch(command()) {
+    default:
+        return QString::number(sequenceNumber());
+    case MavlinkQmlSingleton::MAV_CMD_NAV_TAKEOFF:
+        return QStringLiteral("T");
+    case MavlinkQmlSingleton::MAV_CMD_NAV_LAND:
+        return QStringLiteral("L");
+    }
+}
+
 void SimpleMissionItem::_clearParamMetaData(void)
 {
     _param1MetaData.setRawUnits("");
     _param1MetaData.setDecimalPlaces(FactMetaData::defaultDecimalPlaces);
+    _param1MetaData.setBuiltInTranslator();
     _param2MetaData.setRawUnits("");
     _param2MetaData.setDecimalPlaces(FactMetaData::defaultDecimalPlaces);
+    _param2MetaData.setBuiltInTranslator();
     _param3MetaData.setRawUnits("");
     _param3MetaData.setDecimalPlaces(FactMetaData::defaultDecimalPlaces);
+    _param3MetaData.setBuiltInTranslator();
     _param4MetaData.setRawUnits("");
     _param4MetaData.setDecimalPlaces(FactMetaData::defaultDecimalPlaces);
+    _param4MetaData.setBuiltInTranslator();
 }
 
 QmlObjectListModel* SimpleMissionItem::textFieldFacts(void)
@@ -366,6 +387,7 @@ QmlObjectListModel* SimpleMissionItem::textFieldFacts(void)
                 paramMetaData->setDecimalPlaces(paramInfo->decimalPlaces());
                 paramMetaData->setEnumInfo(paramInfo->enumStrings(), paramInfo->enumValues());
                 paramMetaData->setRawUnits(paramInfo->units());
+                paramMetaData->setAppSettingsTranslators();
                 paramFact->setMetaData(paramMetaData);
                 model->append(paramFact);
 

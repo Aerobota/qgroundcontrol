@@ -157,7 +157,7 @@ static QObject* mavlinkQmlSingletonFactory(QQmlEngine*, QJSEngine*)
 
 static QObject* qgroundcontrolQmlGlobalSingletonFactory(QQmlEngine*, QJSEngine*)
 {
-    // We create this object as a QGCTool even though it isn't int he toolbox
+    // We create this object as a QGCTool even though it isn't in the toolbox
     QGroundControlQmlGlobal* qmlGlobal = new QGroundControlQmlGlobal(qgcApp());
     qmlGlobal->setToolbox(qgcApp()->toolbox());
 
@@ -483,7 +483,6 @@ bool QGCApplication::_initForNormalAppBoot(void)
 #ifdef __mobile__
     _qmlAppEngine = new QQmlApplicationEngine(this);
     _qmlAppEngine->addImportPath("qrc:/qml");
-    _qmlAppEngine->rootContext()->setContextProperty("multiVehicleManager", toolbox()->multiVehicleManager());
     _qmlAppEngine->rootContext()->setContextProperty("joystickManager", toolbox()->joystickManager());
     _qmlAppEngine->load(QUrl(QStringLiteral("qrc:/qml/MainWindowNative.qml")));
 #else

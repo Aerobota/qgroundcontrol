@@ -783,17 +783,17 @@ void Vehicle::setLongitude(double longitude){
 
 void Vehicle::_updateAttitude(UASInterface*, double roll, double pitch, double yaw, quint64)
 {
-    if (isinf(roll)) {
+    if (qIsInf(roll)) {
         _rollFact.setRawValue(0);
     } else {
         _rollFact.setRawValue(roll * (180.0 / M_PI));
     }
-    if (isinf(pitch)) {
+    if (qIsInf(pitch)) {
         _pitchFact.setRawValue(0);
     } else {
         _pitchFact.setRawValue(pitch * (180.0 / M_PI));
     }
-    if (isinf(yaw)) {
+    if (qIsInf(yaw)) {
         _headingFact.setRawValue(0);
     } else {
         yaw = yaw * (180.0 / M_PI);
@@ -1485,7 +1485,37 @@ void Vehicle::emergencyStop(void)
     cmd.param7 = 0.0f;
     cmd.target_system = id();
     cmd.target_component = 0;
+    mavlink_msg_command_long_encode(_mavlink->getSystemId(), _mavlink->getComponentId(), &msg, &cmd);
 
+    sendMessage(msg);
+}
+
+void Vehicle::setCurrentMissionSequence(int seq)
+{
+    if (!_firmwarePlugin->sendHomePositionToVehicle()) {
+        seq--;
+    }
+    mavlink_message_t msg;
+    mavlink_msg_mission_set_current_pack(_mavlink->getSystemId(), _mavlink->getComponentId(), &msg, id(), _compID, seq);
+    sendMessage(msg);
+}
+
+void Vehicle::doCommandLong(int component, MAV_CMD command, float param1, float param2, float param3, float param4, float param5, float param6, float param7)
+{
+    mavlink_message_t       msg;
+    mavlink_command_long_t  cmd;
+
+    cmd.command = command;
+    cmd.confirmation = 0;
+    cmd.param1 = param1;
+    cmd.param2 = param2;
+    cmd.param3 = param3;
+    cmd.param4 = param4;
+    cmd.param5 = param5;
+    cmd.param6 = param6;
+    cmd.param7 = param7;
+    cmd.target_system = id();
+    cmd.target_component = component;
     mavlink_msg_command_long_encode(_mavlink->getSystemId(), _mavlink->getComponentId(), &msg, &cmd);
 
     sendMessage(msg);
